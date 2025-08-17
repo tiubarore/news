@@ -20,7 +20,7 @@ const News = ({ notizia }) => {
         {/* Image Container */}
         <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0 overflow-hidden rounded-lg">
           <img
-            src={notizia.urlToImage || "/news-placeholder.jpg"}
+            src={notizia.image || "/news-placeholder.jpg"}
             alt={notizia.title}
             className="w-full h-36 sm:h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"

@@ -1,60 +1,80 @@
 import { useState, useEffect } from "react";
 import Home from "./pages/Home";
+
 const App = () => {
   const api_key = import.meta.env.VITE_API_KEY;
-  const type = "top-headlines";
   const [selectedCategory, setSelectedCategory] = useState("general");
   const [selectedCountry, setSelectedCountry] = useState("us");
-  // const api_url_base = "https://newsapi.org/v2/${type}?country=us&apiKey=";
-  const api_url = `https://newsapi.org/v2/${type}?country=${selectedCountry}&category=${selectedCategory}&apiKey=`;
   const [news, setNews] = useState([]);
-  const [categories, setCategories] = useState([
+  const [categories] = useState([
+    "general",
     "business",
     "entertainment",
-    "general",
     "health",
     "science",
-    "sport",
+    "sports",
     "technology",
   ]);
 
-  const [countries, setCountries] = useState(["us", "it", "es"]);
+  const [countries] = useState([
+    { code: "us", name: "United States" },
+    { code: "it", name: "Italy" },
+    { code: "es", name: "Spain" },
+  ]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await fetch(`${api_url}${api_key}`);
-        if (!res.ok) throw new Error("Error fetching data");
+        setIsLoading(true);
+        setError(null);
+
+        // GNews API requires either 'q' search parameter or 'category'
+        const url = new URL("https://gnews.io/api/v4/top-headlines");
+        url.searchParams.append("category", selectedCategory.toLowerCase());
+        url.searchParams.append("country", selectedCountry.toLowerCase());
+        url.searchParams.append("apikey", api_key);
+        url.searchParams.append("max", "10"); // Limit to 10 articles
+
+        const res = await fetch(url);
+
+        if (!res.ok) {
+          throw new Error(`GNews API error: ${res.status}`);
+        }
+
         const data = await res.json();
         setNews(data);
       } catch (error) {
         setError(error.message);
+        console.error("API Error:", error);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchNews();
-  }, [selectedCategory, selectedCountry]);
+  }, [selectedCategory, selectedCountry, api_key]);
+
   return (
-    <div className="max-h-lg px-20">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="font-semibold text-3xl text-center py-5">
         News from around the world
       </h1>
       <Home
         categories={categories}
-        setCategories={setCategories}
+        countries={countries}
         news={news}
         isLoading={isLoading}
-        setIsLoading={setIsLoading}
         error={error}
         setSelectedCategory={setSelectedCategory}
-        countries={countries}
         setSelectedCountry={setSelectedCountry}
+        selectedCategory={selectedCategory}
+        selectedCountry={selectedCountry}
       />
     </div>
   );
 };
+
 export default App;
