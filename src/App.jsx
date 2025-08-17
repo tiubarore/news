@@ -31,14 +31,9 @@ const App = () => {
         setIsLoading(true);
         setError(null);
 
-        // GNews API requires either 'q' search parameter or 'category'
-        const url = new URL("https://gnews.io/api/v4/top-headlines");
-        url.searchParams.append("category", selectedCategory.toLowerCase());
-        url.searchParams.append("country", selectedCountry.toLowerCase());
-        url.searchParams.append("apikey", api_key);
-        url.searchParams.append("max", "10"); // Limit to 10 articles
-
-        const res = await fetch(url);
+        const res = await fetch(
+          `/api/news?country=${selectedCountry}&category=${selectedCategory}`
+        );
 
         if (!res.ok) {
           throw new Error(`GNews API error: ${res.status}`);
